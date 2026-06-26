@@ -5,7 +5,7 @@ import pygame
 
 from code.Const import WIN_WIDTH, WIN_HEIGHT
 from code.menu import Menu
-
+from code.level import Level
 
 class Game:
     def __init__(self):
@@ -24,10 +24,13 @@ class Game:
             option = menu.run()
 
             if option == 'NEW GAME 1P':
-                print("Iniciando jogo 1 jogador...")
+
+                level = Level(self.window)
+
+                level.run()
 
             elif option == 'NEW GAME 2P - COP':
-                print("Iniciando jogo cooperativo...")
+                print("Iniciando jogo coop...")
 
             elif option == 'SCORE':
                 print("Abrindo placar...")
