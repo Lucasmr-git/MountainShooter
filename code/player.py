@@ -16,24 +16,46 @@ class Player(Entity):
 
         self.name = "Player"
 
-        self.speed = 8
+        self.speed = 10
 
         self.surf = pygame.image.load(
             "./asset/Player1.png"
         ).convert_alpha()
 
+        self.surf = pygame.transform.smoothscale(
+            self.surf,
+            (64, 64)
+        )
+
         self.rect = self.surf.get_rect()
 
         self.rect.center = (
             WIN_WIDTH // 2,
-            WIN_HEIGHT - 80
+            WIN_HEIGHT - 120
         )
 
-        # Lista de tiros
+        # Sistema de tiros
         self.shot_list = []
-
-        # Tempo entre disparos
         self.shot_delay = 0
+
+        # Sistema de vidas
+        self.life = 3
+
+        # Invencibilidade temporária
+        self.invincible = 0
+
+        # Sons
+        self.shoot_sound = self.load_sound("./asset/Shoot.wav", 0.3)
+
+    def load_sound(self, path, volume=0.5):
+
+        try:
+            sound = pygame.mixer.Sound(path)
+            sound.set_volume(volume)
+            return sound
+
+        except pygame.error:
+            return None
 
     def update(self):
 
@@ -41,6 +63,9 @@ class Player(Entity):
 
         if self.shot_delay > 0:
             self.shot_delay -= 1
+
+        if self.invincible > 0:
+            self.invincible -= 1
 
         for shot in self.shot_list[:]:
 
@@ -77,11 +102,12 @@ class Player(Entity):
                     )
                 )
 
-                # Aproximadamente 5 tiros por segundo
+                if self.shoot_sound is not None:
+                    self.shoot_sound.play()
+
                 self.shot_delay = 12
 
         # Limites da tela
-
         if self.rect.left < 0:
             self.rect.left = 0
 
@@ -93,3 +119,15 @@ class Player(Entity):
 
         if self.rect.bottom > WIN_HEIGHT:
             self.rect.bottom = WIN_HEIGHT
+
+    def hit(self):
+
+        if self.invincible == 0:
+
+            self.life -= 1
+
+            self.invincible = 120
+
+            return True
+
+        return False

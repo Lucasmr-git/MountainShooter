@@ -18,7 +18,6 @@ class Menu:
             "./asset/MenuBg.png"
         ).convert()
 
-        # Ajusta o tamanho da imagem para a janela do jogo
         self.surf = pygame.transform.smoothscale(
             self.surf,
             (WIN_WIDTH, WIN_HEIGHT)
@@ -40,20 +39,22 @@ class Menu:
                 self.rect
             )
 
+            # Título
             self.menu_text(
-                text_size=50,
+                text_size=80,
                 text="Shadowed",
                 text_color=(255, 128, 0),
                 text_center_pos=(WIN_WIDTH / 2, 70)
             )
 
             self.menu_text(
-                text_size=50,
+                text_size=80,
                 text="Sky",
                 text_color=(255, 128, 0),
                 text_center_pos=(WIN_WIDTH / 2, 120)
             )
 
+            # Opções do menu
             for i in range(len(MENU_OPTION)):
 
                 if i == selected_option:
@@ -64,11 +65,40 @@ class Menu:
                     text = MENU_OPTION[i]
 
                 self.menu_text(
-                    text_size=20,
+                    text_size=40,
                     text=text,
                     text_color=color,
-                    text_center_pos=(WIN_WIDTH / 2, 200 + 25 * i)
+                    text_center_pos=(WIN_WIDTH / 2, 200 + 30 * i)
                 )
+
+            # Controles (requisito do trabalho)
+            self.menu_text(
+                text_size=25,
+                text="CONTROLES",
+                text_color=(255, 255, 0),
+                text_center_pos=(WIN_WIDTH / 2, 380)
+            )
+
+            self.menu_text(
+                text_size=25,
+                text="↑ ↓ ← →  Mover",
+                text_color=(255, 255, 255),
+                text_center_pos=(WIN_WIDTH / 2, 410)
+            )
+
+            self.menu_text(
+                text_size=25,
+                text="SPACE  Atirar",
+                text_color=(255, 255, 255),
+                text_center_pos=(WIN_WIDTH / 2, 435)
+            )
+
+            self.menu_text(
+                text_size=25,
+                text="ESC  Voltar / Sair",
+                text_color=(255, 255, 255),
+                text_center_pos=(WIN_WIDTH / 2, 460)
+            )
 
             pygame.display.flip()
 
@@ -96,11 +126,13 @@ class Menu:
                         pygame.mixer.music.stop()
                         return MENU_OPTION[selected_option]
 
-    def menu_text(self,
-                  text_size: int,
-                  text: str,
-                  text_color: tuple,
-                  text_center_pos: tuple) -> None:
+    def menu_text(
+        self,
+        text_size: int,
+        text: str,
+        text_color: tuple,
+        text_center_pos: tuple
+    ) -> None:
 
         text_font: Font = pygame.font.SysFont(
             name="Lucida Sans Typewriter",

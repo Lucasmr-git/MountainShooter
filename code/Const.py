@@ -1,8 +1,6 @@
 
 
 MENU_OPTION = ('NEW GAME 1P',
-               'NEW GAME 2P - COP',
-               'SCORE',
                'EXIT')
 
 
