@@ -42,6 +42,20 @@ class Level:
         self.game_over = False
         self.win = False
 
+        # Controle para não tocar sons finais várias vezes
+        self.game_over_sound_played = False
+        self.win_sound_played = False
+
+        # Sons
+        self.explosion_sound = self.load_sound("./asset/Explosion.wav", 1.0)
+        self.hit_sound = self.load_sound("./asset/Hit.wav", 0.8)
+        self.game_over_sound = self.load_sound("./asset/GameOver.wav", 1.0)
+        self.win_sound = self.load_sound("./asset/Win.wav", 1.0)
+
+        # Canal exclusivo para vitória e derrota
+        self.end_channel = pygame.mixer.Channel(7)
+        self.end_channel.set_volume(1.0)
+
         for i in range(5):
 
             enemy = self.factory.get_entity("enemy")
@@ -50,6 +64,32 @@ class Level:
             enemy.rect.y = -100 - (i * 120)
 
             self.enemy_list.append(enemy)
+
+    def load_sound(self, path, volume=1.0):
+
+        try:
+            sound = pygame.mixer.Sound(path)
+            sound.set_volume(volume)
+            print(f"Som carregado: {path}")
+            return sound
+
+        except (pygame.error, FileNotFoundError) as error:
+            print(f"Erro ao carregar som {path}: {error}")
+            return None
+
+    def play_sound(self, sound):
+
+        if sound is not None:
+            sound.play()
+
+    def damage_player(self):
+
+        life_before = self.player.life
+
+        was_hit = self.player.hit()
+
+        if was_hit and self.player.life < life_before:
+            self.play_sound(self.hit_sound)
 
     def update(self):
 
@@ -65,7 +105,7 @@ class Level:
             # Colisão jogador x inimigo
             if self.player.rect.colliderect(enemy.rect):
 
-                self.player.hit()
+                self.damage_player()
                 enemy.spawn()
 
             # Colisão tiro do inimigo x jogador
@@ -74,33 +114,50 @@ class Level:
                 if shot.rect.colliderect(self.player.rect):
 
                     enemy.shot_list.remove(shot)
-                    self.player.hit()
+                    self.damage_player()
 
             # Colisão tiro do jogador x inimigo
             for shot in self.player.shot_list[:]:
 
                 if shot.rect.colliderect(enemy.rect):
 
-                    self.player.shot_list.remove(shot)
+                    if shot in self.player.shot_list:
+                        self.player.shot_list.remove(shot)
 
                     enemy.spawn()
 
-                    self.score += 15
+                    # Som de explosão
+                    self.play_sound(self.explosion_sound)
 
-                    if self.score >= self.win_score:
+                    self.score += 10
+
+                    # Condição de vitória
+                    if self.score >= self.win_score and not self.win:
 
                         self.win = True
+
                         pygame.mixer.music.stop()
+
+                        if not self.win_sound_played and self.win_sound is not None:
+                            self.end_channel.play(self.win_sound)
+                            self.win_sound_played = True
 
                     break
 
             if self.win:
                 break
 
-        if self.player.life <= 0:
+        # Condição de derrota
+        if self.player.life <= 0 and not self.game_over:
 
+            self.player.life = 0
             self.game_over = True
+
             pygame.mixer.music.stop()
+
+            if not self.game_over_sound_played and self.game_over_sound is not None:
+                self.end_channel.play(self.game_over_sound)
+                self.game_over_sound_played = True
 
     def draw(self):
 
@@ -248,6 +305,7 @@ class Level:
     def run(self):
 
         pygame.mixer.music.load("./asset/Level1.mp3")
+        pygame.mixer.music.set_volume(0.35)
         pygame.mixer.music.play(-1)
 
         running = True
